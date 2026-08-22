@@ -50,8 +50,6 @@ class GestureEvent:
     emoji: str
     timestamp: float
     confidence: float = 1.0
-    paused: bool = False
-    presentation_active: bool = False
 
     def to_json(self):
         d = asdict(self)
@@ -103,8 +101,6 @@ class GestureDetector:
         self.fist_hold_duration = 0.5  # seconds
 
         # State
-        self.paused = False
-        self.presentation_active = False
         self.prev_pinching = False
 
     def _fingers_up(self, hl):
@@ -144,7 +140,6 @@ class GestureDetector:
             if sum(f1) == 5 and sum(f2) == 5:
                 self.fist_start_time = 0
                 self.last_gesture_time = now
-                self.paused = not self.paused
                 return Gesture.TWO_PALMS, 0.95
 
         # Proceed with the primary hand for single-hand gestures
@@ -159,7 +154,6 @@ class GestureDetector:
             elif now - self.fist_start_time >= self.fist_hold_duration:
                 self.fist_start_time = 0
                 self.last_gesture_time = now
-                self.presentation_active = not self.presentation_active
                 return Gesture.FIST, 0.9
             return Gesture.NONE, 0.0
 
@@ -219,10 +213,10 @@ def draw_status_bar(img, gesture, detector, w, h, mode="webcam"):
     cv2.addWeighted(overlay, 0.7, img, 0.3, 0, img)
 
     # Status text
-    status = "PAUSED" if detector.paused else "ACTIVE"
-    status_color = (0, 200, 255) if not detector.paused else (0, 100, 200)
+    status = "ACTIVE"
+    status_color = (0, 200, 255)
     mode_label = "PHONE" if mode == "phone" else "WEBCAM"
-    cv2.putText(img, f"GestureSlide [{mode_label}] | {status}", (15, 22),
+    cv2.putText(img, f"Spellcaster Arena [{mode_label}] | {status}", (15, 22),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.55, status_color, 1, cv2.LINE_AA)
 
     # Current gesture
@@ -379,23 +373,8 @@ def process_frame(frame, detector_mp, gesture_detector, ws_server, last_gesture,
         draw_hand_skeleton(frame, hl, w, h)
 
     # Detect gesture
-    if hands and not gesture_detector.paused:
+    if hands:
         gesture, confidence = gesture_detector.detect(hands, w, h)
-
-
-    elif hands and gesture_detector.paused:
-        # Still check for two palms gesture to unpause
-        if len(hands) == 2:
-            f1 = gesture_detector._fingers_up(hands[0])
-            f2 = gesture_detector._fingers_up(hands[1])
-            if sum(f1) == 5 and sum(f2) == 5:
-                now = time.time()
-                elapsed = (now - gesture_detector.last_gesture_time) * 1000
-                if elapsed > gesture_detector.cooldown_ms:
-                    gesture_detector.paused = False
-                    gesture_detector.last_gesture_time = now
-                    gesture = Gesture.TWO_PALMS
-                    confidence = 0.95
 
     # Draw HUD
     draw_status_bar(frame, gesture, gesture_detector, w, h, mode=mode)
@@ -413,8 +392,6 @@ def process_frame(frame, detector_mp, gesture_detector, ws_server, last_gesture,
             emoji=emoji,
             timestamp=time.time(),
             confidence=confidence,
-            paused=gesture_detector.paused,
-            presentation_active=gesture_detector.presentation_active,
         )
         ws_server.broadcast(event)
         
