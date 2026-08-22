@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { HandData, SpellName, SpellTriggerEvent, ArenaMode, AnimeBanner } from "./types";
 import { AnimeParticleEngine } from "./AnimeParticleEngine";
 import { AnimeCombatEngine } from "./AnimeCombatEngine";
@@ -127,27 +127,27 @@ export default function SpellArena() {
     
     switch (spell) {
       case 'kamehameha':
-        kanji = "かめはめ波"; english = "KAMEHAMEHA"; color = "#00ffff";
+        kanji = "ã‹ã‚ã¯ã‚æ³¢"; english = "KAMEHAMEHA"; color = "#00ffff";
         animeAudio.playKamehamehaBeam();
         break;
       case 'hollow_purple':
-        kanji = "虚式「茈」"; english = "HOLLOW PURPLE"; color = "#aa00ff";
+        kanji = "è™šå¼ã€ŒèŒˆã€"; english = "HOLLOW PURPLE"; color = "#aa00ff";
         animeAudio.playHollowPurpleBlast();
         break;
       case 'domain_expansion':
-        kanji = "領域展開"; english = "DOMAIN EXPANSION"; color = "#ffffff";
+        kanji = "é ˜åŸŸå±•é–‹"; english = "DOMAIN EXPANSION"; color = "#ffffff";
         animeAudio.playDomainExpansion();
         break;
       case 'chidori':
-        kanji = "千鳥"; english = "CHIDORI"; color = "#aaaaff";
+        kanji = "åƒé³¥"; english = "CHIDORI"; color = "#aaaaff";
         animeAudio.playChidori();
         break;
       case 'doctor_strange_shield':
-        kanji = "護封剣"; english = "ELDRITCH SHIELD"; color = "#ffaa00";
+        kanji = "è­·å°å‰£"; english = "ELDRITCH SHIELD"; color = "#ffaa00";
         animeAudio.playEldritchShield();
         break;
       case 'thanos_snap':
-        kanji = "崩壊"; english = "INFINITY SNAP"; color = "#ffff00";
+        kanji = "å´©å£Š"; english = "INFINITY SNAP"; color = "#ffff00";
         animeAudio.playThanosSnap();
         break;
     }
@@ -246,7 +246,7 @@ export default function SpellArena() {
                <div className="h-4 bg-gray-900 rounded-full border-2 border-red-900 overflow-hidden relative">
                   <div 
                     className="absolute top-0 left-0 h-full bg-red-600 transition-all duration-300 shadow-[0_0_10px_red]"
-                    style={{ width: \`\${(combatEngineRef.current.boss.hp / combatEngineRef.current.boss.maxHp) * 100}%\` }}
+                    style={{ width: `${(combatEngineRef.current.boss.hp / combatEngineRef.current.boss.maxHp) * 100}%` }}
                   />
                </div>
             </div>
