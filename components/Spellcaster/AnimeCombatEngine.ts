@@ -103,7 +103,7 @@ export class AnimeCombatEngine {
     if (!this.boss || this.boss.state === 'defeated') return;
     
     // Reflect attacks if using shield
-    if (event.spell === 'doctor_strange_shield' || event.spell === 'two_palms') {
+    if (event.spell === 'doctor_strange_shield') {
       let deflected = false;
       this.boss.attacks.forEach(atk => {
         if (!atk.reflected && atk.y > 300) { // If close to player
