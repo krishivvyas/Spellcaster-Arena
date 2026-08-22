@@ -209,21 +209,7 @@ export class AnimeAudioSynth {
     osc.stop(t + 0.2);
   }
 
-  public playBossHit(isCrit: boolean) {
-    if (!this.ctx || !this.masterGain || !this.enabled) return;
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(isCrit ? 150 : 200, t);
-    osc.frequency.exponentialRampToValueAtTime(50, t + 0.1);
-    gain.gain.setValueAtTime(isCrit ? 0.8 : 0.4, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-    osc.start(t);
-    osc.stop(t + 0.2);
-  }
+
 }
 
 export const animeAudio = new AnimeAudioSynth();

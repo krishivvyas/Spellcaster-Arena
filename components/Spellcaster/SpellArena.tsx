@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { HandData, SpellName, SpellTriggerEvent, ArenaMode, AnimeBanner } from "./types";
+import { HandData, SpellName, SpellTriggerEvent, AnimeBanner } from "./types";
 import { AnimeParticleEngine } from "./AnimeParticleEngine";
-import { AnimeCombatEngine } from "./AnimeCombatEngine";
 import { animeAudio } from "./AnimeAudioSynth";
 
 export default function SpellArena() {
@@ -12,7 +11,6 @@ export default function SpellArena() {
   const videoCanvasRef = useRef<HTMLCanvasElement>(null);
   
   const particleEngineRef = useRef<AnimeParticleEngine | null>(null);
-  const combatEngineRef = useRef<AnimeCombatEngine | null>(null);
   const requestRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   
@@ -20,7 +18,6 @@ export default function SpellArena() {
   const [activeSpell, setActiveSpell] = useState<SpellName>('none');
   const activeSpellRef = useRef<SpellName>('none');
   const [banners, setBanners] = useState<AnimeBanner[]>([]);
-  const [mode, setMode] = useState<ArenaMode>('sandbox');
   
   const handsRef = useRef<HandData[]>([]);
   const latestFrameRef = useRef<HTMLImageElement | null>(null);
@@ -31,12 +28,9 @@ export default function SpellArena() {
     const deltaTime = (time - lastTimeRef.current) / 1000;
     lastTimeRef.current = time;
     
-    if (canvasRef.current && particleEngineRef.current && combatEngineRef.current) {
+    if (canvasRef.current && particleEngineRef.current) {
       const width = canvasRef.current.width;
       const height = canvasRef.current.height;
-      
-      // Update Combat Engine
-      combatEngineRef.current.update(deltaTime, width, height);
       
       // Draw frame to video canvas
       if (videoCanvasRef.current && latestFrameRef.current) {
@@ -52,8 +46,6 @@ export default function SpellArena() {
         deltaTime,
         handsRef.current,
         activeSpellRef.current,
-        combatEngineRef.current.boss,
-        combatEngineRef.current.floatingTexts,
         width,
         height
       );
@@ -129,7 +121,6 @@ export default function SpellArena() {
   }, []);
   
   const handleSpellTrigger = (spell: SpellName) => {
-    if (!combatEngineRef.current) return;
     
     // Audio and Banners
     let kanji = "";
@@ -194,10 +185,6 @@ export default function SpellArena() {
     if (canvasRef.current) {
       particleEngineRef.current = new AnimeParticleEngine(canvasRef.current);
     }
-    combatEngineRef.current = new AnimeCombatEngine();
-    if (mode === 'boss') {
-      combatEngineRef.current.startBossFight();
-    }
     
     connectWebSocket();
     requestRef.current = requestAnimationFrame(animate);
@@ -206,7 +193,7 @@ export default function SpellArena() {
       cancelAnimationFrame(requestRef.current);
       wsRef.current?.close();
     };
-  }, [connectWebSocket, animate, mode]);
+  }, [connectWebSocket, animate]);
 
   return (
     <main 
@@ -251,31 +238,8 @@ export default function SpellArena() {
             </div>
          </div>
          
-         {/* Boss Health Bar */}
-         {mode === 'boss' && combatEngineRef.current?.boss && combatEngineRef.current.boss.state !== 'defeated' && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-1/3">
-               <div className="text-center font-bold text-red-400 tracking-widest text-lg mb-1 drop-shadow-[0_0_5px_red]">
-                  {combatEngineRef.current.boss.title.toUpperCase()}
-               </div>
-               <div className="h-4 bg-gray-900 rounded-full border-2 border-red-900 overflow-hidden relative">
-                  <div 
-                    className="absolute top-0 left-0 h-full bg-red-600 transition-all duration-300 shadow-[0_0_10px_red]"
-                    style={{ width: `${(combatEngineRef.current.boss.hp / combatEngineRef.current.boss.maxHp) * 100}%` }}
-                  />
-               </div>
-            </div>
-         )}
-         
          {/* Bottom Controls (Pointer Events Enabled here if needed) */}
          <div className="flex gap-4 pointer-events-auto">
-            <button className="px-6 py-2 bg-purple-600/50 hover:bg-purple-500 border border-purple-400 rounded-full font-bold transition-all"
-                    onClick={() => { animeAudio.init(); setMode('boss'); }}>
-               BOSS DUEL
-            </button>
-            <button className="px-6 py-2 bg-blue-600/50 hover:bg-blue-500 border border-blue-400 rounded-full font-bold transition-all"
-                    onClick={() => { animeAudio.init(); setMode('sandbox'); }}>
-               SANDBOX
-            </button>
             <a href="/controller" className="px-6 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-full font-bold transition-all">
                EXIT ARENA
             </a>

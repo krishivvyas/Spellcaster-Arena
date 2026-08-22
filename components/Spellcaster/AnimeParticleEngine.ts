@@ -1,4 +1,4 @@
-import { HandData, SpellName, BossState, FloatingText } from './types';
+import { HandData, SpellName } from './types';
 
 interface Particle {
   x: number;
@@ -29,8 +29,6 @@ export class AnimeParticleEngine {
     deltaTime: number,
     hands: HandData[],
     activeSpell: SpellName,
-    boss: BossState | null,
-    floatingTexts: FloatingText[],
     width: number,
     height: number
   ) {
@@ -91,25 +89,6 @@ export class AnimeParticleEngine {
        this.drawCyberHand(hand, width, height);
        this.emitSpellParticles(hand, activeSpell, width, height);
     });
-
-    // Draw Boss
-    if (boss && boss.state !== 'defeated') {
-       this.drawBoss(boss, width, height);
-    }
-    
-    // Draw Floating Texts
-    floatingTexts.forEach(ft => {
-       this.ctx.globalAlpha = ft.alpha;
-       this.ctx.fillStyle = ft.color;
-       this.ctx.font = `bold ${ft.size}px sans-serif`;
-       if (ft.isCrit) {
-         this.ctx.shadowColor = 'red';
-         this.ctx.shadowBlur = 10;
-       }
-       this.ctx.fillText(ft.text, ft.x, ft.y);
-       this.ctx.shadowBlur = 0;
-    });
-    this.ctx.globalAlpha = 1.0;
   }
 
   private drawCyberHand(hand: HandData, width: number, height: number) {
@@ -235,30 +214,5 @@ export class AnimeParticleEngine {
          });
        }
     }
-  }
-
-  private drawBoss(boss: BossState, width: number, height: number) {
-    const bx = width / 2;
-    const by = 150;
-    
-    // Draw Boss Body
-    this.ctx.fillStyle = boss.state === 'vulnerable' ? 'purple' : 'darkred';
-    this.ctx.beginPath();
-    this.ctx.arc(bx, by, 60, 0, Math.PI * 2);
-    this.ctx.fill();
-    this.ctx.strokeStyle = 'red';
-    this.ctx.lineWidth = 3;
-    this.ctx.stroke();
-    
-    // Draw Boss Attacks
-    boss.attacks.forEach(atk => {
-      this.ctx.fillStyle = atk.color;
-      this.ctx.shadowColor = atk.glowColor;
-      this.ctx.shadowBlur = 20;
-      this.ctx.beginPath();
-      this.ctx.arc(atk.x, atk.y, atk.radius, 0, Math.PI*2);
-      this.ctx.fill();
-      this.ctx.shadowBlur = 0;
-    });
   }
 }
