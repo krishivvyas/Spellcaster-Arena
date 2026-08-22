@@ -9,16 +9,16 @@ interface Particle {
   maxLife: number;
   color: string;
   size: number;
-  type: 'flame' | 'spark' | 'smoke' | 'electric' | 'void' | 'dust' | 'rune' | 'debris';
+  type: 'flame' | 'spark' | 'smoke' | 'electric' | 'void' | 'dust' | 'rune' | 'debris' | 'lightning' | 'beam';
   angle?: number;
   spin?: number;
+  thickness?: number;
 }
 
 export class AnimeParticleEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private particles: Particle[] = [];
-  private lastTime: number = 0;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -61,10 +61,20 @@ export class AnimeParticleEngine {
       this.ctx.globalAlpha = alpha;
       this.ctx.fillStyle = p.color;
 
-      if (p.type === 'electric' || p.type === 'flame' || p.type === 'void') {
+      if (p.type === 'electric' || p.type === 'flame' || p.type === 'void' || p.type === 'lightning') {
         this.ctx.globalCompositeOperation = 'screen';
       } else {
         this.ctx.globalCompositeOperation = 'source-over';
+      }
+
+      if (p.type === 'lightning') {
+          this.ctx.beginPath();
+          this.ctx.moveTo(p.x, p.y);
+          this.ctx.lineTo(p.x + p.vx * p.life * 10, p.y + p.vy * p.life * 10);
+          this.ctx.lineWidth = p.thickness || 2;
+          this.ctx.strokeStyle = p.color;
+          this.ctx.stroke();
+          continue;
       }
 
       this.ctx.beginPath();
@@ -73,7 +83,7 @@ export class AnimeParticleEngine {
          this.ctx.translate(p.x, p.y);
          this.ctx.rotate(p.angle);
          this.ctx.font = `${p.size}px monospace`;
-         this.ctx.fillText("X", 0, 0); // Simplified rune
+         this.ctx.fillText('X', 0, 0); // Simplified rune
          this.ctx.restore();
       } else {
         this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -92,26 +102,26 @@ export class AnimeParticleEngine {
   }
 
   private drawCyberHand(hand: HandData, width: number, height: number) {
-    this.ctx.strokeStyle = hand.handedness === 'Left' ? 'rgba(0, 255, 255, 0.6)' : 'rgba(255, 0, 255, 0.6)';
-    this.ctx.lineWidth = 3;
+    this.ctx.strokeStyle = hand.handedness === 'Left' ? 'rgba(0, 255, 255, 0.4)' : 'rgba(255, 0, 255, 0.4)';
+    this.ctx.lineWidth = 2;
     this.ctx.shadowColor = this.ctx.strokeStyle;
-    this.ctx.shadowBlur = 10;
+    this.ctx.shadowBlur = 15;
     
     // Draw palm center
     const cx = hand.palmCenter.x * width;
     const cy = hand.palmCenter.y * height;
     
     this.ctx.beginPath();
-    this.ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+    this.ctx.arc(cx, cy, 15, 0, Math.PI * 2);
     this.ctx.stroke();
     
-    // Draw connections (simplified for now, ideally use full connections array)
+    // Draw joints
     hand.landmarks.forEach(lm => {
        const lx = lm.x * width;
        const ly = lm.y * height;
        this.ctx.beginPath();
-       this.ctx.arc(lx, ly, 4, 0, Math.PI * 2);
-       this.ctx.fillStyle = 'white';
+       this.ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+       this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
        this.ctx.fill();
     });
     
@@ -121,97 +131,182 @@ export class AnimeParticleEngine {
   private emitSpellParticles(hand: HandData, spell: SpellName, width: number, height: number) {
     const cx = hand.palmCenter.x * width;
     const cy = hand.palmCenter.y * height;
+    const time = Date.now() / 1000;
     
     if (spell === 'kamehameha') {
-       for(let i=0; i<8; i++) {
+       // Kamehameha: Huge bright cyan core with intense outward energy
+       this.ctx.save();
+       this.ctx.translate(cx, cy);
+       this.ctx.beginPath();
+       this.ctx.arc(0, 0, 40 + Math.sin(time * 30) * 10, 0, Math.PI * 2);
+       this.ctx.fillStyle = '#ffffff';
+       this.ctx.shadowColor = '#00ffff';
+       this.ctx.shadowBlur = 50;
+       this.ctx.fill();
+       
+       // Core aura
+       this.ctx.beginPath();
+       this.ctx.arc(0, 0, 70 + Math.cos(time * 20) * 10, 0, Math.PI * 2);
+       this.ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+       this.ctx.fill();
+       this.ctx.restore();
+
+       for(let i=0; i<5; i++) {
+         const angle = Math.random() * Math.PI * 2;
+         const speed = 10 + Math.random() * 20;
          this.particles.push({
-           x: cx + (Math.random()-0.5)*50,
-           y: cy + (Math.random()-0.5)*50,
-           vx: (Math.random()-0.5)*3,
-           vy: (Math.random()-0.5)*3,
-           life: 1.0 + Math.random()*1.0,
-           maxLife: 2.0,
-           color: 'rgba(0, 255, 255, 0.8)',
-           size: 8 + Math.random()*20,
+           x: cx + (Math.random()-0.5)*30,
+           y: cy + (Math.random()-0.5)*30,
+           vx: Math.cos(angle) * speed,
+           vy: Math.sin(angle) * speed,
+           life: 0.5 + Math.random()*0.5,
+           maxLife: 1.0,
+           color: Math.random() > 0.5 ? '#ffffff' : '#00ffff',
+           size: 4 + Math.random()*6,
            type: 'flame'
          });
        }
     } else if (spell === 'chidori') {
-       // Tip of index finger
+       // Chidori: Lightning arcs at the index finger tip
        if (hand.landmarks.length > 8) {
          const ix = hand.landmarks[8].x * width;
          const iy = hand.landmarks[8].y * height;
-         for(let i=0; i<5; i++) {
-           this.particles.push({
-             x: ix + (Math.random()-0.5)*10,
-             y: iy + (Math.random()-0.5)*10,
-             vx: (Math.random()-0.5)*20,
-             vy: (Math.random()-0.5)*20,
-             life: 0.3 + Math.random()*0.3,
-             maxLife: 0.6,
-             color: 'rgba(200, 200, 255, 0.9)',
-             size: 3 + Math.random()*5,
-             type: 'electric'
-           });
+         
+         // Core
+         this.ctx.beginPath();
+         this.ctx.arc(ix, iy, 20 + Math.random()*10, 0, Math.PI*2);
+         this.ctx.fillStyle = '#ffffff';
+         this.ctx.shadowColor = '#00aaff';
+         this.ctx.shadowBlur = 40;
+         this.ctx.fill();
+         
+         // Lightning arcs
+         for(let i=0; i<4; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(ix, iy);
+            let lx = ix, ly = iy;
+            for(let j=0; j<5; j++) {
+                lx += (Math.random()-0.5)*80;
+                ly += (Math.random()-0.5)*80;
+                this.ctx.lineTo(lx, ly);
+            }
+            this.ctx.strokeStyle = Math.random() > 0.5 ? '#ffffff' : '#88ccff';
+            this.ctx.lineWidth = 2 + Math.random()*4;
+            this.ctx.stroke();
          }
+         
+         // Sparks
+         this.particles.push({
+           x: ix, y: iy,
+           vx: (Math.random()-0.5)*30, vy: (Math.random()-0.5)*30,
+           life: 0.3, maxLife: 0.3, color: '#ffffff', size: 3, type: 'spark'
+         });
        }
     } else if (spell === 'doctor_strange_shield') {
-       // Draw rotating mandala (simplified)
-       const time = Date.now() / 1000;
+       // Doctor Strange: intricate glowing mandala
        this.ctx.save();
        this.ctx.translate(cx, cy);
-       this.ctx.rotate(time * 2);
-       this.ctx.strokeStyle = 'rgba(255, 150, 0, 0.8)';
-       this.ctx.lineWidth = 6;
-       this.ctx.shadowColor = 'orange';
+       this.ctx.strokeStyle = '#ffaa00';
+       this.ctx.shadowColor = '#ff5500';
        this.ctx.shadowBlur = 20;
-       this.ctx.beginPath();
-       this.ctx.arc(0, 0, 80, 0, Math.PI * 2);
-       this.ctx.stroke();
-       // Inner square
-       this.ctx.rotate(-time * 4);
-       this.ctx.strokeRect(-55, -55, 110, 110);
-       this.ctx.restore();
-    } else if (spell === 'rasengan') {
-       for(let i=0; i<6; i++) {
-         const angle = Math.random() * Math.PI * 2;
-         const radius = Math.random() * 40;
-         this.particles.push({
-           x: cx + Math.cos(angle) * radius,
-           y: cy + Math.sin(angle) * radius,
-           vx: Math.cos(angle + Math.PI/2) * 5, // Orbit velocity
-           vy: Math.sin(angle + Math.PI/2) * 5,
-           life: 0.8 + Math.random()*0.5,
-           maxLife: 1.3,
-           color: 'rgba(50, 150, 255, 0.8)',
-           size: 4 + Math.random()*8,
-           type: 'void',
-           spin: 0.1
-         });
+       
+       // Outer ring
+       this.ctx.rotate(time * 2);
+       this.ctx.lineWidth = 4;
+       this.ctx.beginPath(); this.ctx.arc(0, 0, 100, 0, Math.PI*2); this.ctx.stroke();
+       this.ctx.lineWidth = 1;
+       this.ctx.beginPath(); this.ctx.arc(0, 0, 110, 0, Math.PI*2); this.ctx.stroke();
+       
+       // Runic inner text
+       this.ctx.font = 'bold 18px monospace';
+       this.ctx.fillStyle = '#ffaa00';
+       for (let i = 0; i < 12; i++) {
+          this.ctx.rotate(Math.PI / 6);
+          this.ctx.fillText('᚛ᚈᚎ', 75, 6);
        }
-       // Core sphere
+       
+       // Inner geometry
+       this.ctx.rotate(-time * 4);
+       this.ctx.lineWidth = 3;
+       this.ctx.beginPath();
+       for(let i=0; i<3; i++) {
+           this.ctx.rect(-60, -60, 120, 120);
+           this.ctx.rotate(Math.PI/3);
+       }
+       this.ctx.stroke();
+       
+       // Inner circles
+       this.ctx.beginPath(); this.ctx.arc(0, 0, 45, 0, Math.PI*2); this.ctx.stroke();
+       this.ctx.beginPath(); this.ctx.arc(0, 0, 20, 0, Math.PI*2); this.ctx.stroke();
+       
+       this.ctx.restore();
+       
+       // Embers flying off
+       if (Math.random() < 0.5) {
+          const angle = Math.random() * Math.PI * 2;
+          this.particles.push({
+             x: cx + Math.cos(angle)*100, y: cy + Math.sin(angle)*100,
+             vx: (Math.random()-0.5)*2, vy: 1 + Math.random()*3, // Fall down like sparks
+             life: 1.0, maxLife: 1.5, color: '#ffaa00', size: 2 + Math.random()*2, type: 'spark'
+          });
+       }
+    } else if (spell === 'rasengan') {
+       // Rasengan: Rotating sphere of dense chakra
        this.ctx.save();
        this.ctx.translate(cx, cy);
-       this.ctx.fillStyle = 'rgba(200, 230, 255, 0.9)';
-       this.ctx.shadowColor = '#00aaff';
-       this.ctx.shadowBlur = 30;
+       
+       // Aura
        this.ctx.beginPath();
-       this.ctx.arc(0, 0, 30, 0, Math.PI * 2);
+       this.ctx.arc(0, 0, 60 + Math.sin(time*20)*5, 0, Math.PI*2);
+       this.ctx.fillStyle = 'rgba(150, 220, 255, 0.4)';
+       this.ctx.shadowColor = '#0088ff';
+       this.ctx.shadowBlur = 40;
        this.ctx.fill();
+
+       // Core
+       this.ctx.beginPath();
+       this.ctx.arc(0, 0, 30, 0, Math.PI*2);
+       this.ctx.fillStyle = '#ffffff';
+       this.ctx.fill();
+       
+       // High-speed swirls
+       this.ctx.rotate(time * 25);
+       this.ctx.beginPath();
+       this.ctx.arc(15, 0, 30, 0, Math.PI, false);
+       this.ctx.lineWidth = 6;
+       this.ctx.strokeStyle = '#ffffff';
+       this.ctx.stroke();
+       
+       this.ctx.rotate(Math.PI/2);
+       this.ctx.beginPath();
+       this.ctx.arc(15, 0, 30, 0, Math.PI, false);
+       this.ctx.stroke();
+
        this.ctx.restore();
-    } else if (spell === 'thanos_snap') {
+       
+       // Fast chakra trails
        for(let i=0; i<4; i++) {
-         this.particles.push({
-           x: cx + (Math.random()-0.5)*80,
-           y: cy + (Math.random()-0.5)*80,
-           vx: 0,
-           vy: -1 - Math.random()*2, // float upwards
-           life: 2.0 + Math.random()*2.0,
-           maxLife: 4.0,
-           color: 'rgba(255, 215, 0, 0.7)', // gold dust
-           size: 2 + Math.random()*4,
-           type: 'spark'
-         });
+          const angle = Math.random() * Math.PI*2;
+          this.particles.push({
+            x: cx + Math.cos(angle)*50, y: cy + Math.sin(angle)*50,
+            vx: Math.cos(angle + Math.PI/2)*20, vy: Math.sin(angle + Math.PI/2)*20,
+            life: 0.3, maxLife: 0.3, color: '#aaddff', size: 3, type: 'spark'
+          });
+       }
+    } else if (spell === 'thanos_snap') {
+       // Thanos Snap: Disintegrating ash and golden cosmic dust
+       for(let i=0; i<6; i++) {
+          const isGold = Math.random() < 0.15;
+          this.particles.push({
+            x: cx + (Math.random()-0.5)*200, y: cy + (Math.random()-0.5)*200,
+            vx: (Math.random()-0.5)*3 + 3, // Drift to the right like ash
+            vy: -Math.random()*4 - 1,      // Float up slightly
+            life: 2 + Math.random()*3,
+            maxLife: 5,
+            color: isGold ? '#ffd700' : 'rgba(100, 100, 100, 0.7)',
+            size: isGold ? 3 : 4 + Math.random()*5,
+            type: 'dust'
+          });
        }
     }
   }
