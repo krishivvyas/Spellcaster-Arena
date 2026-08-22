@@ -247,7 +247,7 @@ export default function SpellArena() {
       </div>
       
       {/* Anime Banners Layer */}
-      <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none flex items-end justify-center overflow-hidden pb-20 z-20">
          {banners.map(banner => (
             <div key={banner.id} 
                  className="absolute w-full h-48 bg-black/80 border-y-4 flex flex-col items-center justify-center animate-slide-in-out"
