@@ -85,14 +85,21 @@ export default function SpellArena() {
               else if (rawGesture === 'thumbs_up') mapped = 'rasengan';
               else if (rawGesture === 'pinch') mapped = 'thanos_snap';
 
-              if (mapped !== activeSpellRef.current && mapped !== 'none') {
-                 handleSpellTrigger(mapped);
+              if (mapped !== 'none') {
+                 if (mapped !== activeSpellRef.current) {
+                    handleSpellTrigger(mapped);
+                 }
+                 activeSpellRef.current = mapped;
+                 setActiveSpell(mapped);
+              } else if (!handsRef.current || handsRef.current.length === 0) {
+                 activeSpellRef.current = 'none';
+                 setActiveSpell('none');
               }
-              activeSpellRef.current = mapped;
-              setActiveSpell(mapped);
            } else {
-              activeSpellRef.current = 'none';
-              setActiveSpell('none');
+              if (!handsRef.current || handsRef.current.length === 0) {
+                 activeSpellRef.current = 'none';
+                 setActiveSpell('none');
+              }
            }
         } else if (data.type === "gesture") {
            // Fallback for original backend
@@ -105,11 +112,16 @@ export default function SpellArena() {
            else if (gestureData.gesture === 'thumbs_up') mapped = 'rasengan';
            else if (gestureData.gesture === 'pinch') mapped = 'thanos_snap';
            
-           if (mapped !== activeSpellRef.current && mapped !== 'none') {
-              handleSpellTrigger(mapped);
+           if (mapped !== 'none') {
+              if (mapped !== activeSpellRef.current) {
+                 handleSpellTrigger(mapped);
+              }
+              activeSpellRef.current = mapped;
+              setActiveSpell(mapped);
+           } else if (!handsRef.current || handsRef.current.length === 0) {
+              activeSpellRef.current = 'none';
+              setActiveSpell('none');
            }
-           activeSpellRef.current = mapped;
-           setActiveSpell(mapped);
         }
       } catch (e) {}
     };
