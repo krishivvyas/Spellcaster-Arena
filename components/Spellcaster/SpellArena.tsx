@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { HandData, SpellName, SpellTriggerEvent, AnimeBanner } from "./types";
+import { HandData, SpellName, AnimeBanner } from "./types";
 import { AnimeParticleEngine } from "./AnimeParticleEngine";
 import { animeAudio } from "./AnimeAudioSynth";
 
@@ -167,16 +167,7 @@ export default function SpellArena() {
       }]);
     }
     
-    // Combat
-    const event: SpellTriggerEvent = {
-       spell,
-       stage: 'fire',
-       power: 1.0,
-       position: { x: 0, y: 0 },
-       timestamp: Date.now(),
-       confidence: 1.0
-    };
-    combatEngineRef.current.handleSpellHit(event);
+
   };
 
   useEffect(() => {

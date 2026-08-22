@@ -40,15 +40,6 @@ export interface HandData {
   rawGesture?: string;
 }
 
-export interface SpellTriggerEvent {
-  spell: SpellName;
-  stage: 'charge' | 'fire' | 'active' | 'end';
-  power: number; // 0.0 to 1.0
-  position: { x: number; y: number };
-  target?: { x: number; y: number };
-  timestamp: number;
-  confidence: number;
-}
 
 export interface AnimeBanner {
   id: string;
