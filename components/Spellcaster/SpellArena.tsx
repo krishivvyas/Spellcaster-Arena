@@ -18,6 +18,7 @@ export default function SpellArena() {
   
   const [connected, setConnected] = useState(false);
   const [activeSpell, setActiveSpell] = useState<SpellName>('none');
+  const activeSpellRef = useRef<SpellName>('none');
   const [banners, setBanners] = useState<AnimeBanner[]>([]);
   const [mode, setMode] = useState<ArenaMode>('sandbox');
   
@@ -50,7 +51,7 @@ export default function SpellArena() {
       particleEngineRef.current.updateAndDraw(
         deltaTime,
         handsRef.current,
-        activeSpell,
+        activeSpellRef.current,
         combatEngineRef.current.boss,
         combatEngineRef.current.floatingTexts,
         width,
@@ -62,7 +63,7 @@ export default function SpellArena() {
     setBanners(prev => prev.filter(b => time - b.startTime < b.duration));
     
     requestRef.current = requestAnimationFrame(animate);
-  }, [activeSpell]);
+  }, []);
 
   // WebSocket Connection
   const connectWebSocket = useCallback(() => {
@@ -92,11 +93,13 @@ export default function SpellArena() {
               else if (rawGesture === 'thumbs_up') mapped = 'rasengan';
               else if (rawGesture === 'pinch') mapped = 'thanos_snap';
 
-              if (mapped !== activeSpell && mapped !== 'none') {
+              if (mapped !== activeSpellRef.current && mapped !== 'none') {
                  handleSpellTrigger(mapped);
               }
+              activeSpellRef.current = mapped;
               setActiveSpell(mapped);
            } else {
+              activeSpellRef.current = 'none';
               setActiveSpell('none');
            }
         } else if (data.type === "gesture") {
@@ -110,9 +113,10 @@ export default function SpellArena() {
            else if (gestureData.gesture === 'thumbs_up') mapped = 'rasengan';
            else if (gestureData.gesture === 'pinch') mapped = 'thanos_snap';
            
-           if (mapped !== activeSpell && mapped !== 'none') {
+           if (mapped !== activeSpellRef.current && mapped !== 'none') {
               handleSpellTrigger(mapped);
            }
+           activeSpellRef.current = mapped;
            setActiveSpell(mapped);
         }
       } catch (e) {}
@@ -122,7 +126,7 @@ export default function SpellArena() {
       setTimeout(connectWebSocket, 3000);
     };
     wsRef.current = ws;
-  }, [activeSpell]);
+  }, []);
   
   const handleSpellTrigger = (spell: SpellName) => {
     if (!combatEngineRef.current) return;
