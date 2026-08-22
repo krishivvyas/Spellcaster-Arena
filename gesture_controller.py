@@ -574,6 +574,23 @@ def main():
         print(f"  • Phone camera: https://{local_ip}:3000/camera")
         print(f"  • Waiting for phone to connect...")
     else:
+        print(f"  • Open your presentation app (PowerPoint, Google Slides, etc.)")
+    print(f"  • Press 'Q' in the camera window to quit")
+    print()
+
+    last_gesture = Gesture.NONE
+
+    while True:
+        if phone_mode:
+            # Get frame from phone via WebSocket
+            frame = ws_server.get_phone_frame()
+            if frame is None:
+                # No frame yet, show waiting screen
+                waiting = np.zeros((480, 640, 3), dtype=np.uint8)
+                cv2.putText(waiting, "Waiting for phone camera...", (100, 220),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 200, 255), 2, cv2.LINE_AA)
+                cv2.putText(waiting, f"Open http://{local_ip}:3000/camera on phone", (70, 260),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (150, 150, 150), 1, cv2.LINE_AA)
                 cv2.imshow("Spellcaster Arena — Phone Camera", waiting)
                 key = cv2.waitKey(100) & 0xFF
                 if key == ord('q'):
