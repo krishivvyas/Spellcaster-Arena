@@ -1,9 +1,8 @@
 """
-GestureSlide — Hands-Free Presentation Controller
+Spellcaster Arena — Gesture Magic Engine
 ===================================================
-Detects hand gestures via MediaPipe and simulates keyboard shortcuts
-to control any presentation app (PowerPoint, Google Slides, Keynote, etc.).
-Streams gesture state to a Next.js dashboard via WebSocket.
+Detects hand gestures via MediaPipe and broadcasts 3D hand data
+to a Next.js arena via WebSocket.
 
 Supports two camera modes:
   python gesture_controller.py          # Use local webcam
@@ -27,7 +26,6 @@ from dataclasses import dataclass, asdict
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from pynput.keyboard import Controller as KeyboardCtrl, Key
 import websockets
 from websockets.asyncio.server import serve
 
@@ -81,12 +79,12 @@ HAND_CONNECTIONS = [
 ]
 
 GESTURE_INFO = {
-    Gesture.INDEX_UP: ("☝️", "Previous Slide"),
-    Gesture.THUMBS_UP: ("👍", "Next Slide"),
-    Gesture.FIST: ("✊", "Toggle Presentation"),
-    Gesture.TWO_PALMS: ("🙌", "Pause/Resume Recognition"),
-    Gesture.PINCH: ("🤏", "Toggle Blank Screen"),
-    Gesture.NONE: ("⏳", "Waiting for gesture..."),
+    Gesture.INDEX_UP: ("⚡", "Chidori"),
+    Gesture.THUMBS_UP: ("🌀", "Rasengan"),
+    Gesture.FIST: ("💥", "Kamehameha"),
+    Gesture.TWO_PALMS: ("✨", "Eldritch Shield"),
+    Gesture.PINCH: ("🫰", "Infinity Snap"),
+    Gesture.NONE: ("⏳", "Waiting for jutsu..."),
 }
 
 
@@ -195,37 +193,6 @@ class GestureDetector:
         return Gesture.NONE, 0.0
 
 
-# ─── Keyboard Controller ────────────────────────────────────────────────────
-
-class KeyboardController:
-    """Simulates keyboard shortcuts for presentation control."""
-
-    def __init__(self):
-        self.keyboard = KeyboardCtrl()
-        self.key_map = {
-            Gesture.THUMBS_UP: Key.right,
-            Gesture.INDEX_UP: Key.left,
-            Gesture.FIST: None,         # Handled specially (F5 / Esc toggle)
-            Gesture.PINCH: 'b',         # Blank screen toggle
-        }
-
-    def execute(self, gesture, presentation_active=False):
-        """Execute keyboard action for the given gesture."""
-        if gesture == Gesture.FIST:
-            if presentation_active:
-                self.keyboard.press(Key.f5)
-                self.keyboard.release(Key.f5)
-            else:
-                self.keyboard.press(Key.esc)
-                self.keyboard.release(Key.esc)
-        elif gesture == Gesture.PINCH:
-            self.keyboard.press('b')
-            self.keyboard.release('b')
-        elif gesture in self.key_map and self.key_map[gesture] is not None:
-            key = self.key_map[gesture]
-            self.keyboard.press(key)
-            self.keyboard.release(key)
-
 
 # ─── Drawing Helpers ─────────────────────────────────────────────────────────
 
@@ -262,11 +229,7 @@ def draw_status_bar(img, gesture, detector, w, h, mode="webcam"):
     cv2.putText(img, f"Gesture: {action}", (15, 45),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1, cv2.LINE_AA)
 
-    # Presentation indicator
-    pres_text = "PRESENTING" if detector.presentation_active else "STANDBY"
-    pres_color = (0, 255, 100) if detector.presentation_active else (120, 120, 120)
-    cv2.putText(img, pres_text, (w - 150, 45),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, pres_color, 1, cv2.LINE_AA)
+
 
     # Bottom hints
     cv2.putText(img, "Q: Quit | Gestures: IndexUp/ThumbsUp/Fist/TwoPalms/Pinch",
@@ -393,7 +356,7 @@ class GestureWebSocketServer:
 
 # ─── Process a single frame ─────────────────────────────────────────────────
 
-def process_frame(frame, detector_mp, gesture_detector, keyboard_ctrl, ws_server, last_gesture, mode):
+def process_frame(frame, detector_mp, gesture_detector, ws_server, last_gesture, mode):
     """Process a single frame: detect gestures, draw overlays, broadcast."""
 
     frame = cv2.flip(frame, 1)  # Mirror
@@ -419,9 +382,6 @@ def process_frame(frame, detector_mp, gesture_detector, keyboard_ctrl, ws_server
     if hands and not gesture_detector.paused:
         gesture, confidence = gesture_detector.detect(hands, w, h)
 
-        # Execute keyboard action for actionable gestures
-        if gesture not in (Gesture.NONE, Gesture.TWO_PALMS):
-            keyboard_ctrl.execute(gesture, gesture_detector.presentation_active)
 
     elif hands and gesture_detector.paused:
         # Still check for two palms gesture to unpause
@@ -547,7 +507,6 @@ def main():
 
     # Initialize components
     gesture_detector = GestureDetector(cooldown_ms=800)
-    keyboard_ctrl = KeyboardController()
     ws_server = GestureWebSocketServer(host="0.0.0.0", port=8765)
 
     # Start WebSocket server
@@ -574,7 +533,7 @@ def main():
         print(f"  • Phone camera: https://{local_ip}:3000/camera")
         print(f"  • Waiting for phone to connect...")
     else:
-        print(f"  • Open your presentation app (PowerPoint, Google Slides, etc.)")
+        print(f"  • Cast your spells using hand gestures in the Arena!")
     print(f"  • Press 'Q' in the camera window to quit")
     print()
 
@@ -599,7 +558,7 @@ def main():
 
             frame = cv2.resize(frame, (640, 480))
             last_gesture, display_frame = process_frame(
-                frame, detector_mp, gesture_detector, keyboard_ctrl,
+                frame, detector_mp, gesture_detector,
                 ws_server, last_gesture, mode="phone"
             )
             cv2.imshow("Spellcaster Arena — Phone Camera", display_frame)
@@ -613,7 +572,7 @@ def main():
 
             frame = cv2.resize(frame, (1280, 720))
             last_gesture, display_frame = process_frame(
-                frame, detector_mp, gesture_detector, keyboard_ctrl,
+                frame, detector_mp, gesture_detector,
                 ws_server, last_gesture, mode="webcam"
             )
             cv2.imshow("Spellcaster Arena", display_frame)
