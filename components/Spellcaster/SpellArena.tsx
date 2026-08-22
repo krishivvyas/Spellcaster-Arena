@@ -198,7 +198,7 @@ export default function SpellArena() {
   }, [connectWebSocket, animate, mode]);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-black text-white font-sans">
+    <main className="relative w-screen h-screen overflow-hidden bg-black text-white font-sans">
       {/* Background Camera Layer */}
       <canvas 
         ref={videoCanvasRef} 
@@ -273,7 +273,7 @@ export default function SpellArena() {
          {banners.map(banner => (
             <div key={banner.id} 
                  className="absolute w-full h-48 bg-black/80 border-y-4 flex flex-col items-center justify-center animate-slide-in-out"
-                 style={{ borderColor: banner.themeColor, boxShadow: \`0 0 30px \${banner.themeColor}\` }}>
+                 style={{ borderColor: banner.themeColor, boxShadow: `0 0 30px ${banner.themeColor}` }}>
                <div className="text-[100px] font-black tracking-[0.2em] opacity-20 absolute" style={{ color: banner.themeColor }}>
                   {banner.kanji}
                </div>
@@ -288,7 +288,7 @@ export default function SpellArena() {
       </div>
       
       {/* Global Styles for Animations */}
-      <style dangerouslySetInnerHTML={{__html: \`
+      <style dangerouslySetInnerHTML={{__html: `
         @keyframes slideInOut {
           0% { transform: translateX(100vw) skewX(-15deg); opacity: 0; }
           10% { transform: translateX(0) skewX(-15deg); opacity: 1; }
@@ -298,7 +298,7 @@ export default function SpellArena() {
         .animate-slide-in-out {
           animation: slideInOut 2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
         }
-      \`}} />
-    </div>
+      `}} />
+    </main>
   );
 }
