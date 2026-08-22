@@ -137,6 +137,16 @@ export class AnimeParticleEngine {
        // Kamehameha: Huge bright cyan core with intense outward energy
        this.ctx.save();
        this.ctx.translate(cx, cy);
+       // Huge Beam of light shooting UP (assuming hands are pointing forward)
+       this.ctx.beginPath();
+       this.ctx.rect(-80, -height * 1.5, 160, height * 1.5);
+       const gradient = this.ctx.createLinearGradient(0, 0, 0, -height);
+       gradient.addColorStop(0, '#ffffff');
+       gradient.addColorStop(0.1, 'rgba(0, 255, 255, 0.9)');
+       gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+       this.ctx.fillStyle = gradient;
+       this.ctx.fill();
+
        this.ctx.beginPath();
        this.ctx.arc(0, 0, 40 + Math.sin(time * 30) * 10, 0, Math.PI * 2);
        this.ctx.fillStyle = '#ffffff';
@@ -152,17 +162,17 @@ export class AnimeParticleEngine {
        this.ctx.restore();
 
        for(let i=0; i<5; i++) {
-         const angle = Math.random() * Math.PI * 2;
-         const speed = 10 + Math.random() * 20;
+         const angle = -Math.PI / 2 + (Math.random()-0.5) * 0.5; // Shoot mostly UP
+         const speed = 20 + Math.random() * 40;
          this.particles.push({
-           x: cx + (Math.random()-0.5)*30,
-           y: cy + (Math.random()-0.5)*30,
+           x: cx + (Math.random()-0.5)*40,
+           y: cy + (Math.random()-0.5)*40,
            vx: Math.cos(angle) * speed,
            vy: Math.sin(angle) * speed,
-           life: 0.5 + Math.random()*0.5,
-           maxLife: 1.0,
+           life: 1.5 + Math.random()*1.5,
+           maxLife: 3.0,
            color: Math.random() > 0.5 ? '#ffffff' : '#00ffff',
-           size: 4 + Math.random()*6,
+           size: 6 + Math.random()*8,
            type: 'flame'
          });
        }
@@ -199,7 +209,7 @@ export class AnimeParticleEngine {
          this.particles.push({
            x: ix, y: iy,
            vx: (Math.random()-0.5)*30, vy: (Math.random()-0.5)*30,
-           life: 0.3, maxLife: 0.3, color: '#ffffff', size: 3, type: 'spark'
+           life: 0.9, maxLife: 0.9, color: '#ffffff', size: 4, type: 'spark'
          });
        }
     } else if (spell === 'doctor_strange_shield') {
@@ -247,7 +257,7 @@ export class AnimeParticleEngine {
           this.particles.push({
              x: cx + Math.cos(angle)*100, y: cy + Math.sin(angle)*100,
              vx: (Math.random()-0.5)*2, vy: 1 + Math.random()*3, // Fall down like sparks
-             life: 1.0, maxLife: 1.5, color: '#ffaa00', size: 2 + Math.random()*2, type: 'spark'
+             life: 3.0, maxLife: 4.5, color: '#ffaa00', size: 3 + Math.random()*2, type: 'spark'
           });
        }
     } else if (spell === 'rasengan') {
@@ -290,7 +300,7 @@ export class AnimeParticleEngine {
           this.particles.push({
             x: cx + Math.cos(angle)*50, y: cy + Math.sin(angle)*50,
             vx: Math.cos(angle + Math.PI/2)*20, vy: Math.sin(angle + Math.PI/2)*20,
-            life: 0.3, maxLife: 0.3, color: '#aaddff', size: 3, type: 'spark'
+            life: 0.9, maxLife: 0.9, color: '#aaddff', size: 4, type: 'spark'
           });
        }
     } else if (spell === 'thanos_snap') {
@@ -301,8 +311,8 @@ export class AnimeParticleEngine {
             x: cx + (Math.random()-0.5)*200, y: cy + (Math.random()-0.5)*200,
             vx: (Math.random()-0.5)*3 + 3, // Drift to the right like ash
             vy: -Math.random()*4 - 1,      // Float up slightly
-            life: 2 + Math.random()*3,
-            maxLife: 5,
+            life: 6 + Math.random()*9,
+            maxLife: 15,
             color: isGold ? '#ffd700' : 'rgba(100, 100, 100, 0.7)',
             size: isGold ? 3 : 4 + Math.random()*5,
             type: 'dust'
