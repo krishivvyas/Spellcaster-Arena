@@ -154,7 +154,7 @@ export default function SpellArena() {
     
     if (kanji) {
       setBanners(prev => [...prev, {
-        id: Date.now().toString(),
+        id: Date.now().toString() + "-" + Math.random().toString(36).substr(2, 9),
         kanji,
         english,
         subtext: "Legendary Magic",
