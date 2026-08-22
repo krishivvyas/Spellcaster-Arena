@@ -144,16 +144,16 @@ export class AnimeParticleEngine {
     const cy = hand.palmCenter.y * height;
     
     if (spell === 'kamehameha') {
-       for(let i=0; i<5; i++) {
+       for(let i=0; i<8; i++) {
          this.particles.push({
-           x: cx + (Math.random()-0.5)*40,
-           y: cy + (Math.random()-0.5)*40,
-           vx: (Math.random()-0.5)*2,
-           vy: (Math.random()-0.5)*2,
-           life: 0.5 + Math.random()*0.5,
-           maxLife: 1.0,
+           x: cx + (Math.random()-0.5)*50,
+           y: cy + (Math.random()-0.5)*50,
+           vx: (Math.random()-0.5)*3,
+           vy: (Math.random()-0.5)*3,
+           life: 1.0 + Math.random()*1.0,
+           maxLife: 2.0,
            color: 'rgba(0, 255, 255, 0.8)',
-           size: 5 + Math.random()*15,
+           size: 8 + Math.random()*20,
            type: 'flame'
          });
        }
@@ -162,16 +162,16 @@ export class AnimeParticleEngine {
        if (hand.landmarks.length > 8) {
          const ix = hand.landmarks[8].x * width;
          const iy = hand.landmarks[8].y * height;
-         for(let i=0; i<3; i++) {
+         for(let i=0; i<5; i++) {
            this.particles.push({
-             x: ix,
-             y: iy,
-             vx: (Math.random()-0.5)*15,
-             vy: (Math.random()-0.5)*15,
-             life: 0.1 + Math.random()*0.2,
-             maxLife: 0.3,
+             x: ix + (Math.random()-0.5)*10,
+             y: iy + (Math.random()-0.5)*10,
+             vx: (Math.random()-0.5)*20,
+             vy: (Math.random()-0.5)*20,
+             life: 0.3 + Math.random()*0.3,
+             maxLife: 0.6,
              color: 'rgba(200, 200, 255, 0.9)',
-             size: 2 + Math.random()*4,
+             size: 3 + Math.random()*5,
              type: 'electric'
            });
          }
@@ -183,16 +183,57 @@ export class AnimeParticleEngine {
        this.ctx.translate(cx, cy);
        this.ctx.rotate(time * 2);
        this.ctx.strokeStyle = 'rgba(255, 150, 0, 0.8)';
-       this.ctx.lineWidth = 4;
+       this.ctx.lineWidth = 6;
        this.ctx.shadowColor = 'orange';
-       this.ctx.shadowBlur = 15;
+       this.ctx.shadowBlur = 20;
        this.ctx.beginPath();
-       this.ctx.arc(0, 0, 60, 0, Math.PI * 2);
+       this.ctx.arc(0, 0, 80, 0, Math.PI * 2);
        this.ctx.stroke();
        // Inner square
        this.ctx.rotate(-time * 4);
-       this.ctx.strokeRect(-40, -40, 80, 80);
+       this.ctx.strokeRect(-55, -55, 110, 110);
        this.ctx.restore();
+    } else if (spell === 'rasengan') {
+       for(let i=0; i<6; i++) {
+         const angle = Math.random() * Math.PI * 2;
+         const radius = Math.random() * 40;
+         this.particles.push({
+           x: cx + Math.cos(angle) * radius,
+           y: cy + Math.sin(angle) * radius,
+           vx: Math.cos(angle + Math.PI/2) * 5, // Orbit velocity
+           vy: Math.sin(angle + Math.PI/2) * 5,
+           life: 0.8 + Math.random()*0.5,
+           maxLife: 1.3,
+           color: 'rgba(50, 150, 255, 0.8)',
+           size: 4 + Math.random()*8,
+           type: 'void',
+           spin: 0.1
+         });
+       }
+       // Core sphere
+       this.ctx.save();
+       this.ctx.translate(cx, cy);
+       this.ctx.fillStyle = 'rgba(200, 230, 255, 0.9)';
+       this.ctx.shadowColor = '#00aaff';
+       this.ctx.shadowBlur = 30;
+       this.ctx.beginPath();
+       this.ctx.arc(0, 0, 30, 0, Math.PI * 2);
+       this.ctx.fill();
+       this.ctx.restore();
+    } else if (spell === 'thanos_snap') {
+       for(let i=0; i<4; i++) {
+         this.particles.push({
+           x: cx + (Math.random()-0.5)*80,
+           y: cy + (Math.random()-0.5)*80,
+           vx: 0,
+           vy: -1 - Math.random()*2, // float upwards
+           life: 2.0 + Math.random()*2.0,
+           maxLife: 4.0,
+           color: 'rgba(255, 215, 0, 0.7)', // gold dust
+           size: 2 + Math.random()*4,
+           type: 'spark'
+         });
+       }
     }
   }
 
