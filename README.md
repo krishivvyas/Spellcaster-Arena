@@ -6,18 +6,19 @@ Spellcaster Arena uses **MediaPipe 3D Hand Tracking** and a high-performance **N
 
 ---
 
-## 🌟 Legendary Powers
+## 🌟 Legendary Powers & Gestures
 
-Use intuitive hand gestures to trigger these epic, visually stunning attacks:
+Make sure your hands are clearly visible to your webcam. Use the following exact hand signs to trigger these epic, visually stunning attacks:
 
-| Power | Gesture | Effect |
+| Power | Exact Gesture to Perform | Effect |
 |---|---|---|
-| **💥 Kamehameha** (*Dragon Ball*) | Hold a fist | Fire a massive, screen-spanning laser beam with lightning coils. |
-| **🤞 Domain Expansion** (*Jujutsu Kaisen*) | Cross fingers / Hands clasped | Invert screen colors, summon arcane eye runes, and multiply damage! |
-| **⚡ Chidori** (*Naruto*) | Point index finger | Shoot crackling procedural electrical arcs from your fingertips. |
-| **🌀 Rasengan** (*Naruto*) | Open palm (Thumb up) | Conjure a roaring high-speed swirling blue chakra orb. |
-| **✨ Eldritch Mandalas** (*Dr. Strange*) | Open both palms | Summon glowing, spinning runic magic shields to deflect attacks. |
-| **🫰 Infinity Snap** (*Thanos*) | Pinch & Release | Dissolve targets into floating dust particles with a golden flash. |
+| **💥 Kamehameha** (*Dragon Ball*) | **The Fist:** Close all fingers on one hand into a tight fist and hold it for half a second. | Fire a massive, screen-spanning laser beam with lightning coils. |
+| **⚡ Chidori** (*Naruto*) | **The Index:** Keep your hand closed, but extend *only* your Index finger pointing up. | Shoot crackling procedural electrical arcs from your fingertips. |
+| **🌀 Rasengan** (*Naruto*) | **The Thumb:** Keep your hand closed, but extend *only* your Thumb pointing out (Thumbs Up). | Conjure a roaring high-speed swirling blue chakra orb. |
+| **✨ Eldritch Shield** (*Dr. Strange*) | **Two Open Palms:** Hold *both* hands up to the camera with all five fingers wide open on each hand. | Summon glowing, spinning runic magic shields to deflect Boss attacks. |
+| **🫰 Infinity Snap** (*Thanos*) | **The Pinch:** Bring your thumb and index finger tips together (pinch) while keeping other fingers closed. | Dissolve targets into floating dust particles with a golden flash. |
+
+> **Pro-Tip:** Make sure your background isn't too cluttered and the lighting is decent so the MediaPipe AI can track your fingers accurately!
 
 *(All spells feature zero-dependency procedurally generated Web Audio sound effects!)*
 
