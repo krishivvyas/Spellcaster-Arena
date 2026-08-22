@@ -19,7 +19,7 @@ export default function SpellArena() {
   const [connected, setConnected] = useState(false);
   const [activeSpell, setActiveSpell] = useState<SpellName>('none');
   const [banners, setBanners] = useState<AnimeBanner[]>([]);
-  const [mode, setMode] = useState<ArenaMode>('boss');
+  const [mode, setMode] = useState<ArenaMode>('sandbox');
   
   const handsRef = useRef<HandData[]>([]);
   const latestFrameRef = useRef<HTMLImageElement | null>(null);
@@ -84,11 +84,18 @@ export default function SpellArena() {
            handsRef.current = data.hands || [];
            
            if (data.gestures && data.gestures.length > 0) {
-              const mainGesture = data.gestures[0];
-              if (mainGesture !== activeSpell && mainGesture !== 'none') {
-                 handleSpellTrigger(mainGesture);
+              const rawGesture = data.gestures[0];
+              let mapped: SpellName = 'none';
+              if (rawGesture === 'fist') mapped = 'kamehameha';
+              else if (rawGesture === 'two_palms') mapped = 'doctor_strange_shield';
+              else if (rawGesture === 'index_up') mapped = 'chidori';
+              else if (rawGesture === 'thumbs_up') mapped = 'rasengan';
+              else if (rawGesture === 'pinch') mapped = 'thanos_snap';
+
+              if (mapped !== activeSpell && mapped !== 'none') {
+                 handleSpellTrigger(mapped);
               }
-              setActiveSpell(mainGesture as SpellName);
+              setActiveSpell(mapped);
            } else {
               setActiveSpell('none');
            }
@@ -198,7 +205,10 @@ export default function SpellArena() {
   }, [connectWebSocket, animate, mode]);
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden bg-black text-white font-sans">
+    <main 
+      className="relative w-screen h-screen overflow-hidden bg-black text-white font-sans"
+      onClick={() => animeAudio.init()}
+    >
       {/* Background Camera Layer */}
       <canvas 
         ref={videoCanvasRef} 
